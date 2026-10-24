@@ -8,3 +8,6 @@ using System.Windows;
                                                 //(used if a resource is not found in the page,
                                                 // app, or any theme specific resource dictionaries)
 )]
+
+// o autoteste (tools/SelfTest) usa os auxiliares internos de processo e caminho
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SelfTest")]

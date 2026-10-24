@@ -23,6 +23,23 @@ public partial class TriggersView : UserControl
             App.Settings.Save();
         };
         Loaded += (_, _) => { SyncKey(); SyncZones(); UpdateHotkeyStatus(); };
+        Favorites.ItemsSource = App.Settings.FavoriteFolders;
+        void syncFav() => NoFavorites.Visibility = App.Settings.FavoriteFolders.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        App.Settings.FavoriteFolders.CollectionChanged += (_, _) => { syncFav(); App.Settings.Save(); };
+        syncFav();
+    }
+
+    void AddFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Pasta favorita para “Mover para…”", Multiselect = true };
+        if (dlg.ShowDialog() != true) return;
+        foreach (var dir in dlg.FolderNames)
+            if (!App.Settings.FavoriteFolders.Contains(dir, StringComparer.OrdinalIgnoreCase)) App.Settings.FavoriteFolders.Add(dir);
+    }
+
+    void RemoveFolder_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is string dir) App.Settings.FavoriteFolders.Remove(dir);
     }
 
     void SyncKey()

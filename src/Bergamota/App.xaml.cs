@@ -43,7 +43,7 @@ public partial class App : Application
         {
             // fallback (ex.: fatia testada pelo ▶ do editor): manda para o único online, ou abre a roda de escolha
             var online = Devices.Devices.Where(d => d.IsOnline && d.ShowInWheel).ToList();
-            if (online.Count == 1) await Devices.SendAsync(online[0], files);
+            if (online.Count == 1 && Settings.FavoriteFolders.Count == 0) await Devices.SendAsync(online[0], files);
             else
             {
                 Native.GetCursorPos(out var pt);

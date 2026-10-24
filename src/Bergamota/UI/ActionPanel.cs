@@ -12,27 +12,27 @@ using Bergamota.Theme;
 namespace Bergamota.UI;
 
 /// <summary>
-/// Janela "Converter para": aparece onde os arquivos foram soltos e mostra só os formatos
-/// possíveis para aquela extensão (e para as ferramentas instaladas).
-/// Fundo escuro quase opaco para o texto ficar legível em qualquer papel de parede.
+/// Painel de ações que aparece onde os arquivos foram soltos: cabeçalho, seções de cartões,
+/// dicas e rodapé. Fundo escuro quase opaco para o texto ficar legível em qualquer papel de parede.
+/// Usado por "Converter e ajustar" e "Mover para…".
 /// </summary>
-public sealed class ConvertWindow : Window
+public sealed class ActionPanel : Window
 {
     static readonly Brush TextB = new SolidColorBrush(Color.FromRgb(0xE8, 0xEF, 0xE9));
     static readonly Brush MutedB = new SolidColorBrush(Color.FromRgb(0x9A, 0xAB, 0xA1));
+    static readonly Brush DimB = new SolidColorBrush(Color.FromRgb(0x6A, 0x7B, 0x71));
     static readonly Brush InkB = new SolidColorBrush(Color.FromRgb(0x1B, 0x24, 0x10));
     static readonly Brush AccentB = new SolidColorBrush(Color.FromRgb(0xC9, 0xDC, 0x5A));
     static readonly Brush CardB = new SolidColorBrush(Color.FromArgb(0x10, 255, 255, 255));
     static readonly Brush CardStroke = new SolidColorBrush(Color.FromArgb(0x1C, 255, 255, 255));
 
-    readonly IReadOnlyList<string> _files;
+    readonly StackPanel _body = new() { Width = 516 };
     readonly Border _panel;
     readonly ScaleTransform _scale = new(0.92, 0.92);
-    bool _closing;
+    bool _closing, _hasCards;
 
-    public ConvertWindow(IReadOnlyList<string> files)
+    public ActionPanel(string title, string subtitle, string icon)
     {
-        _files = files;
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
@@ -40,60 +40,32 @@ public sealed class ConvertWindow : Window
         ShowInTaskbar = false;
         ResizeMode = ResizeMode.NoResize;
         SizeToContent = SizeToContent.WidthAndHeight;
-        Title = "Converter para";
+        Title = title;
         FontFamily = (FontFamily)Application.Current.FindResource("UiFont");
         TextOptions.SetTextFormattingMode(this, TextFormattingMode.Ideal);
         TextOptions.SetTextRenderingMode(this, TextRenderingMode.Grayscale);
         TextOptions.SetTextHintingMode(this, TextHintingMode.Animated);
 
-        var targets = Converter.TargetsFor(files);
-        var hint = Converter.MissingToolHint(files);
-
-        var root = new StackPanel { Width = 516 };
-        // cabeçalho
-        var head = new DockPanel { Margin = new Thickness(0, 0, 0, 16) };
-        var badge = new Border
+        var head = new DockPanel { Margin = new Thickness(0, 0, 0, 6) };
+        head.Children.Add(new Border
         {
             Width = 40, Height = 40, CornerRadius = new CornerRadius(12), Margin = new Thickness(0, 0, 12, 0),
             Background = new SolidColorBrush(Color.FromArgb(0x24, 0xC9, 0xDC, 0x5A)),
             Child = new Path
             {
-                Data = Icons.Get("convert"), Stroke = AccentB, StrokeThickness = 2, Width = 20, Height = 20, Stretch = Stretch.Uniform,
+                Data = Icons.Get(icon), Stroke = AccentB, StrokeThickness = 2, Width = 20, Height = 20, Stretch = Stretch.Uniform,
                 StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
             },
-        };
-        head.Children.Add(badge);
-        var titles = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        titles.Children.Add(new TextBlock { Text = "Converter para", Foreground = TextB, FontSize = 17, FontWeight = FontWeights.SemiBold });
-        titles.Children.Add(new TextBlock { Text = ActionRunner.Describe(files), Foreground = MutedB, FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis });
-        head.Children.Add(titles);
-        root.Children.Add(head);
-
-        // formatos
-        if (targets.Count > 0)
-        {
-            var grid = new WrapPanel();
-            foreach (var t in targets) grid.Children.Add(FormatCard(t));
-            root.Children.Add(grid);
-        }
-        else
-        {
-            root.Children.Add(new TextBlock
-            {
-                Text = "Nenhum formato disponível para esses arquivos.", Foreground = TextB, FontSize = 13.5, Margin = new Thickness(0, 4, 0, 6),
-            });
-        }
-        if (hint != null)
-            root.Children.Add(new TextBlock { Text = hint, Foreground = MutedB, FontSize = 12, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 10, 0, 0) });
-        root.Children.Add(new TextBlock
-        {
-            Text = "O original fica intacto · o novo arquivo vai para a mesma pasta · Esc cancela",
-            Foreground = new SolidColorBrush(Color.FromRgb(0x6A, 0x7B, 0x71)), FontSize = 11, Margin = new Thickness(0, 14, 0, 0),
         });
+        var titles = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        titles.Children.Add(new TextBlock { Text = title, Foreground = TextB, FontSize = 17, FontWeight = FontWeights.SemiBold });
+        titles.Children.Add(new TextBlock { Text = subtitle, Foreground = MutedB, FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis });
+        head.Children.Add(titles);
+        _body.Children.Add(head);
 
         _panel = new Border
         {
-            Child = root, Padding = new Thickness(20, 18, 20, 16), CornerRadius = new CornerRadius(20), Margin = new Thickness(24),
+            Child = _body, Padding = new Thickness(20, 18, 20, 16), CornerRadius = new CornerRadius(20), Margin = new Thickness(24),
             Background = new LinearGradientBrush(Color.FromArgb(0xF5, 0x18, 0x22, 0x1C), Color.FromArgb(0xF5, 0x10, 0x17, 0x13), 90),
             BorderBrush = new LinearGradientBrush(Color.FromArgb(0x40, 255, 255, 255), Color.FromArgb(0x12, 255, 255, 255), 90),
             BorderThickness = new Thickness(1),
@@ -101,15 +73,48 @@ public sealed class ConvertWindow : Window
             RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = _scale, Opacity = 0,
         };
         Content = _panel;
-
         KeyDown += (_, e) => { if (e.Key == Key.Escape) CloseSoft(); };
         Deactivated += (_, _) => CloseSoft();
     }
 
-    UIElement FormatCard(TargetFormat t)
+    public bool HasCards => _hasCards;
+
+    public void AddSection(string header, IEnumerable<ToolAction> actions)
     {
-        var name = new TextBlock { Text = t.Name, Foreground = TextB, FontSize = 17, FontWeight = FontWeights.SemiBold };
-        var note = new TextBlock { Text = t.Note, Foreground = MutedB, FontSize = 10.5, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(0, 2, 0, 0) };
+        var list = actions.ToList();
+        if (list.Count == 0) return;
+        _hasCards = true;
+        _body.Children.Add(new TextBlock { Text = header, Foreground = DimB, FontSize = 11, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 12, 0, 8) });
+        var grid = new WrapPanel();
+        foreach (var a in list) grid.Children.Add(Card(a));
+        _body.Children.Add(grid);
+    }
+
+    public void AddToggle(string label, bool value, Action<bool> changed)
+    {
+        var row = new DockPanel { Margin = new Thickness(0, 12, 0, 0) };
+        var sw = new CheckBox { Style = (Style)Application.Current.FindResource("Switch"), IsChecked = value };
+        sw.Checked += (_, _) => changed(true);
+        sw.Unchecked += (_, _) => changed(false);
+        DockPanel.SetDock(sw, Dock.Right);
+        row.Children.Add(sw);
+        row.Children.Add(new TextBlock { Text = label, Foreground = TextB, FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+        _body.Children.Add(row);
+    }
+
+    public void AddHint(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        _body.Children.Add(new TextBlock { Text = text, Foreground = MutedB, FontSize = 12, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 10, 0, 0) });
+    }
+
+    public void AddFooter(string text) =>
+        _body.Children.Add(new TextBlock { Text = text, Foreground = DimB, FontSize = 11, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0) });
+
+    UIElement Card(ToolAction a)
+    {
+        var name = new TextBlock { Text = a.Name, Foreground = TextB, FontSize = 15.5, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis };
+        var note = new TextBlock { Text = a.Note, Foreground = MutedB, FontSize = 10.5, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(0, 2, 0, 0) };
         var sp = new StackPanel();
         sp.Children.Add(name); sp.Children.Add(note);
         var card = new Border
@@ -122,9 +127,11 @@ public sealed class ConvertWindow : Window
         card.MouseLeave += (_, _) => { card.Background = CardB; card.BorderBrush = CardStroke; name.Foreground = TextB; note.Foreground = MutedB; };
         card.MouseLeftButtonUp += (_, _) =>
         {
-            var files = _files;
+            // a ação roda só depois de o painel fechar de vez: se ela abrir um diálogo do Windows
+            // (ex.: escolher pasta), ele não pode ficar preso a uma janela que está sendo destruída
+            if (_closing) return;
+            Closed += (_, _) => Application.Current.Dispatcher.BeginInvoke(async () => await a.Run());
             CloseSoft();
-            _ = Converter.ConvertAsync(files, t);
         };
         return card;
     }

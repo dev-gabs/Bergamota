@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -65,7 +65,7 @@ public static class Converter
 
     public static string? Magick => _magick ??= Find("magick.exe", @"C:\Program Files", "ImageMagick*");
     public static string? FFmpeg => _ffmpeg ??= Find("ffmpeg.exe", @"C:\Program Files", "ffmpeg*") ?? Find("ffmpeg.exe", @"C:\", "ffmpeg*");
-    static string? Ghostscript => _gs ??= FindDeep("gswin64c.exe", @"C:\Program Files\gs");
+    internal static string? Ghostscript => _gs ??= FindDeep("gswin64c.exe", @"C:\Program Files\gs");
     static bool Word => _word ??= Type.GetTypeFromProgID("Word.Application") != null;
     static bool Excel => _excel ??= Type.GetTypeFromProgID("Excel.Application") != null;
     static bool PowerPoint => _ppt ??= Type.GetTypeFromProgID("PowerPoint.Application") != null;
@@ -246,7 +246,7 @@ public static class Converter
         Run(FFmpeg!, $"-hide_banner -loglevel error -y -i \"{input}\" {args} \"{output}\"", TimeSpan.FromHours(3));
     }
 
-    static void Run(string exe, string args, TimeSpan timeout)
+    internal static void Run(string exe, string args, TimeSpan timeout)
     {
         var psi = new ProcessStartInfo(exe, args) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true, RedirectStandardOutput = true };
         using var p = Process.Start(psi) ?? throw new IOException("não consegui iniciar " + Path.GetFileName(exe));
@@ -296,7 +296,7 @@ public static class Converter
         return rtb;
     }
 
-    static string Unique(string path)
+    internal static string Unique(string path)
     {
         if (!File.Exists(path)) return path;
         var dir = Path.GetDirectoryName(path)!;

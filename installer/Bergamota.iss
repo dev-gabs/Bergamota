@@ -6,7 +6,7 @@
 ; (FFmpeg, ImageMagick, 7-Zip, PowerToys, LocalSend) aparecem como opções só se faltarem,
 ; e são instalados pelo winget.
 
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 
 [Setup]
 AppId={{2250FDCF-C300-46B6-9F23-281378191C04}
@@ -52,6 +52,7 @@ pt.DepMagick=ImageMagick — converter imagens (WEBP, AVIF, HEIC, ICO, PDF)
 pt.Dep7zip=7-Zip — extrair .rar, .7z e outros (o WinRAR também serve)
 pt.DepPowerToys=PowerToys — o PowerRename, para renomear em lote (download grande)
 pt.DepLocalSend=LocalSend — receber no PC arquivos enviados do celular
+pt.DepGhostscript=Ghostscript — comprimir PDFs
 pt.Installing=Instalando %1…
 
 [Tasks]
@@ -59,6 +60,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "dep_ffmpeg"; Description: "{cm:DepFFmpeg}"; GroupDescription: "{cm:Deps}"; Check: NeedsFFmpeg
 Name: "dep_magick"; Description: "{cm:DepMagick}"; GroupDescription: "{cm:Deps}"; Check: NeedsMagick
 Name: "dep_7zip"; Description: "{cm:Dep7zip}"; GroupDescription: "{cm:Deps}"; Check: NeedsArchiver
+Name: "dep_ghostscript"; Description: "{cm:DepGhostscript}"; GroupDescription: "{cm:Deps}"; Check: NeedsGhostscript
 Name: "dep_localsend"; Description: "{cm:DepLocalSend}"; GroupDescription: "{cm:Deps}"; Check: NeedsLocalSend
 Name: "dep_powertoys"; Description: "{cm:DepPowerToys}"; GroupDescription: "{cm:Deps}"; Check: NeedsPowerToys; Flags: unchecked
 
@@ -84,6 +86,7 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 Filename: "{code:Winget}"; Parameters: "install --id Gyan.FFmpeg -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,FFmpeg}"; Flags: runhidden waituntilterminated; Tasks: dep_ffmpeg
 Filename: "{code:Winget}"; Parameters: "install --id ImageMagick.ImageMagick -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,ImageMagick}"; Flags: runhidden waituntilterminated; Tasks: dep_magick
 Filename: "{code:Winget}"; Parameters: "install --id 7zip.7zip -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,7-Zip}"; Flags: runhidden waituntilterminated; Tasks: dep_7zip
+Filename: "{code:Winget}"; Parameters: "install --id ArtifexSoftware.GhostScript -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,Ghostscript}"; Flags: runhidden waituntilterminated; Tasks: dep_ghostscript
 Filename: "{code:Winget}"; Parameters: "install --id LocalSend.LocalSend -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,LocalSend}"; Flags: runhidden waituntilterminated; Tasks: dep_localsend
 Filename: "{code:Winget}"; Parameters: "install --id Microsoft.PowerToys -e --silent --accept-package-agreements --accept-source-agreements"; StatusMsg: "{cm:Installing,PowerToys}"; Flags: runhidden waituntilterminated; Tasks: dep_powertoys
 Filename: "{app}\Bergamota.exe"; Description: "{cm:LaunchProgram,Bergamota}"; Flags: nowait postinstall skipifsilent
@@ -171,6 +174,11 @@ function NeedsPowerToys: Boolean;
 begin
   Result := HasWinget and not FileExists(ExpandConstant('{localappdata}\PowerToys\WinUI3Apps\PowerToys.PowerRename.exe'))
     and not FileExists(ExpandConstant('{commonpf64}\PowerToys\WinUI3Apps\PowerToys.PowerRename.exe'));
+end;
+
+function NeedsGhostscript: Boolean;
+begin
+  Result := HasWinget and not DirMatches(ExpandConstant('{commonpf64}\gs\gs*'));
 end;
 
 function NeedsLocalSend: Boolean;

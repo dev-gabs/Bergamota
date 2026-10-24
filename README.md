@@ -8,8 +8,11 @@ Comece a arrastar arquivos e segure **CapsLock** (ou leve até a borda direita d
 - **Menu de contexto:** qualquer item do botão direito do Explorer (o editor lista os itens de um arquivo de exemplo)
 - **Programa:** abre um .exe com os arquivos (`{files}` nos argumentos)
 - **Enviar para:** um aparelho com LocalSend na mesma rede, ou "escolher na hora"
-- **Converter para…** (fatia fixa embaixo, desligável em Configurações): mostra só os formatos possíveis pela extensão.
-  Imagens via ImageMagick (ou o próprio Windows), vídeo/áudio via FFmpeg, documentos/planilhas/apresentações via Office.
+- **Converter e ajustar…** (fatia fixa embaixo, desligável em Configurações): um painel com o que serve para os itens soltos.
+  - *Converter para:* só os formatos possíveis pela extensão. Imagens via ImageMagick (ou o próprio Windows), vídeo/áudio via FFmpeg, documentos/planilhas/apresentações via Office.
+  - *Ajustar imagem:* reduzir 50%, 1920 px, 1080 px, versão leve para web, remover metadados e upscale 2×/4× com IA (Upscayl, se instalado; senão Lanczos).
+  - *PDF:* juntar, separar páginas, imagens → PDF (PDFsharp 6.1.1, MIT, dentro do app) e comprimir (Ghostscript).
+- **Mover para…:** move ou copia para pastas favoritas (Configurações → Pastas favoritas), recentes ou outra pasta, com a janela de progresso do Windows.
 
 ## LocalSend
 O LocalSend 1.18+ exige certificado do remetente. A Bergamota cria o seu em `%AppData%\Bergamota\identity.pfx`

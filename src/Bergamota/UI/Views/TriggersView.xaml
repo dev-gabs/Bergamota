@@ -39,6 +39,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.ColumnSpan="3" Margin="0,0,0,22">
@@ -176,6 +178,41 @@
                             </DockPanel>
                         </Border>
                     </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- pastas da fatia "Mover para…" -->
+            <Border Grid.Row="5" Grid.ColumnSpan="3" Style="{StaticResource GlassCard}">
+                <StackPanel>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Height="40" Click="AddFolder_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource IconPath}" Data="{Binding Source=plus, Converter={StaticResource Icon}}" Width="14" Height="14" Margin="0,0,8,0"/>
+                                <TextBlock Text="Adicionar pasta"/>
+                            </StackPanel>
+                        </Button>
+                        <Path Data="{Binding Source=move, Converter={StaticResource Icon}}" Stroke="{StaticResource Accent}" StrokeThickness="2" Width="20" Height="20" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Pastas favoritas" Style="{StaticResource CardTitle}"/>
+                            <TextBlock Style="{StaticResource Hint}" Text="Aparecem na fatia “Mover para…”. Adicione essa ação a um perfil em Editar Roda."/>
+                        </StackPanel>
+                    </DockPanel>
+                    <ItemsControl x:Name="Favorites" Margin="0,16,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource GlassRow}" Margin="0,0,0,8" Padding="14,8">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Width="36" Height="36" Click="RemoveFolder_Click" ToolTip="Remover">
+                                            <Path Style="{StaticResource IconPath}" Data="{Binding Source=x, Converter={StaticResource Icon}}" Width="12" Height="12"/>
+                                        </Button>
+                                        <Path Data="{Binding Source=folder, Converter={StaticResource Icon}}" Stroke="#CFDCD2" StrokeThickness="2" Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="NoFavorites" Style="{StaticResource Hint}" Text="Nenhuma pasta ainda."/>
                 </StackPanel>
             </Border>
         </Grid>

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,7 +43,7 @@ public partial class EditorView : UserControl
     void RebuildDevices()
     {
         DeviceOptions.Clear();
-        DeviceOptions.Add(new("", "Escolher na hora (mostra os aparelhos)"));
+        DeviceOptions.Add(new("", "Escolher na hora (aparelhos e pastas favoritas)"));
         foreach (var d in App.Devices.Devices) DeviceOptions.Add(new(d.Fingerprint, $"{d.Alias}  ·  {d.Subtitle}"));
     }
 

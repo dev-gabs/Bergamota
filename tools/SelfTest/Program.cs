@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Windows;
 using Bergamota.Core;
@@ -183,6 +183,68 @@ async Task Run()
         }
     }
     else Check(false, "FFmpeg encontrado");
+
+    // ---------- ajustes de imagem ----------
+    var big = Path.Combine(root, "grande.png");
+    Converter.Run(Converter.Magick!, $"-size 2400x1600 gradient:#C9DC5A-#1B2410 -set comment \"teste\" \"{big}\"", TimeSpan.FromMinutes(1));
+    var imgActions = ImageTools.ActionsFor(new[] { big });
+    Check(imgActions.Count >= 6, "ações de imagem disponíveis", string.Join(" · ", imgActions.Select(a => a.Name)));
+    async Task<string?> RunImg(string name, string expected)
+    {
+        var a = imgActions.FirstOrDefault(x => x.Name == name);
+        if (a == null) { Check(false, name, "ação não existe"); return null; }
+        await a.Run();
+        var o = Path.Combine(root, expected);
+        Check(File.Exists(o), name, File.Exists(o) ? Format.Size(new FileInfo(o).Length) : "não gerou " + expected);
+        return File.Exists(o) ? o : null;
+    }
+    string Dim(string f) { var r = new System.Diagnostics.Process { StartInfo = new(Converter.Magick!, $"identify -format \"%wx%h\" \"{f}\"") { RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true } }; r.Start(); var s = r.StandardOutput.ReadToEnd(); r.WaitForExit(); return s.Trim(); }
+    if (await RunImg("Reduzir 50%", "grande-50.png") is { } half) Check(Dim(half) == "1200x800", "Reduzir 50% dá 1200x800", Dim(half));
+    if (await RunImg("1920 px", "grande-1920.png") is { } fhd) Check(Dim(fhd) == "1920x1280", "1920 px mantém a proporção", Dim(fhd));
+    await RunImg("Web", "grande-web.webp");
+    await RunImg("Limpar", "grande-limpo.png");
+    var small = Path.Combine(root, "pequena.png");
+    Converter.Run(Converter.Magick!, $"\"{big}\" -resize 200x133 \"{small}\"", TimeSpan.FromMinutes(1));
+    var up = ImageTools.ActionsFor(new[] { small }).FirstOrDefault(a => a.Name.StartsWith("Upscale 2") || a.Name.StartsWith("Ampliar 2"));
+    if (up != null)
+    {
+        var t0 = DateTime.Now;
+        await up.Run();
+        var o = Path.Combine(root, "pequena-2x.png");
+        Check(File.Exists(o) && Dim(o) == "400x266", $"{up.Name} ({up.Note})", File.Exists(o) ? $"{Dim(o)} em {(DateTime.Now - t0).TotalSeconds:0.0}s" : "não gerou");
+    }
+
+    // ---------- PDF ----------
+    var p1 = Path.Combine(root, "pagina1.png"); var p2 = Path.Combine(root, "pagina2.png");
+    File.Copy(small, p1); File.Copy(Path.Combine(root, "grande-50.png"), p2);
+    var toPdf = PdfTools.ActionsFor(new[] { p2, p1 }).FirstOrDefault();
+    if (toPdf != null) { await toPdf.Run(); }
+    var combined = Path.Combine(root, "pagina1.pdf");
+    Check(File.Exists(combined), "Imagens → PDF (ordem pelo nome: pagina1 primeiro)", toPdf?.Note ?? "sem ação");
+    if (File.Exists(combined))
+    {
+        await PdfTools.ActionsFor(new[] { combined }).First(a => a.Name == "Separar").Run();
+        var pages = Path.Combine(root, "pagina1 (páginas)");
+        var parts = Directory.Exists(pages) ? Directory.GetFiles(pages, "*.pdf").OrderBy(x => x).ToArray() : [];
+        Check(parts.Length == 2, "Separar: 2 páginas em PDFs separados", string.Join(", ", parts.Select(Path.GetFileName)));
+        if (parts.Length == 2)
+        {
+            await PdfTools.ActionsFor(parts).First(a => a.Name == "Juntar").Run();
+            var merged = Directory.GetFiles(pages, "*(juntado).pdf").FirstOrDefault();
+            using var doc = merged != null ? PdfSharp.Pdf.IO.PdfReader.Open(merged, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Import) : null;
+            Check(doc?.PageCount == 2, "Juntar: os 2 PDFs viram um de 2 páginas", merged != null ? Path.GetFileName(merged) : "não gerou");
+        }
+    }
+
+    // ---------- mover / copiar ----------
+    var dest = Path.Combine(root, "destino");
+    Directory.CreateDirectory(dest);
+    var toMove = Path.Combine(root, "mover-me.txt"); File.WriteAllText(toMove, "x");
+    var toCopy = Path.Combine(root, "copiar-me.txt"); File.WriteAllText(toCopy, "y");
+    await FileOps.TransferAsync(new[] { toMove }, dest, copy: false);
+    Check(!File.Exists(toMove) && File.Exists(Path.Combine(dest, "mover-me.txt")), "Mover para pasta");
+    await FileOps.TransferAsync(new[] { toCopy, folder }, dest, copy: true);
+    Check(File.Exists(toCopy) && File.Exists(Path.Combine(dest, "copiar-me.txt")) && File.Exists(Path.Combine(dest, "Pasta teste", "sub", "b.txt")), "Copiar arquivo e pasta (com subpastas)");
 
     var webp = Path.Combine(root, "foto.webp");
     if (File.Exists(webp))

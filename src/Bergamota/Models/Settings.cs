@@ -19,7 +19,8 @@ public record NativeAction(string Id, string Title, string Description, string I
         new("openwith", "Abrir com…", "Escolhe o aplicativo para abrir o arquivo", "openwith"),
         new("properties", "Propriedades", "Mostra as propriedades do Windows", "props"),
         new("copypath", "Copiar caminho", "Copia o caminho completo entre aspas", "link"),
-        new("convert", "Converter para…", "Escolhe o formato e converte (pela extensão)", "convert"),
+        new("convert", "Converter e ajustar…", "Converte o formato e ajusta imagens e PDFs", "convert"),
+        new("moveto", "Mover para…", "Move ou copia para uma pasta favorita", "move"),
     };
 
     public static NativeAction? Find(string? id) => All.FirstOrDefault(a => a.Id == id);
@@ -82,7 +83,7 @@ public class Slice : Observable
         SliceKind.Native => NativeAction.Find(Action)?.Description ?? "",
         SliceKind.ContextMenu => $"Item “{Action}” do menu de contexto",
         SliceKind.Program => string.IsNullOrWhiteSpace(Action) ? "Escolha um programa" : $"Abre com {Path.GetFileNameWithoutExtension(Action)}",
-        SliceKind.Send => string.IsNullOrEmpty(Action) ? "Escolhe o aparelho na hora · LocalSend"
+        SliceKind.Send => string.IsNullOrEmpty(Action) ? "Aparelho (LocalSend) ou pasta favorita, na hora"
             : $"Envia para {App.Devices?.Find(Action)?.Alias ?? "o aparelho"} · LocalSend",
         _ => ""
     };
@@ -240,6 +241,14 @@ public class AppSettings : Observable
     /// <summary>Fatia "Converter para…" fixa embaixo em todos os perfis.</summary>
     public bool ConvertSlice { get => _convertSlice; set => Set(ref _convertSlice, value); }
     bool _convertSlice = true;
+
+    /// <summary>Pastas da fatia "Mover para…" (gerenciadas em Configurações).</summary>
+    public ObservableCollection<string> FavoriteFolders { get; set; } = new();
+    /// <summary>Últimas pastas escolhidas em "Outra pasta…" (até 4).</summary>
+    public List<string> RecentFolders { get; set; } = new();
+    /// <summary>"Mover para…" copia em vez de mover.</summary>
+    public bool MoveCopies { get => _moveCopies; set => Set(ref _moveCopies, value); }
+    bool _moveCopies;
     /// <summary>Diâmetro da roda em DIPs.</summary>
     public int WheelSize { get => _wheelSize; set => Set(ref _wheelSize, value); }
     /// <summary>Intervalo da busca automática de aparelhos; 0 = desligada.</summary>

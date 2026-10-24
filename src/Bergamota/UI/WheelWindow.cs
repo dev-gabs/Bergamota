@@ -292,7 +292,10 @@ public sealed class WheelWindow : Window
             "powerrename" => "PowerRename",
             "properties" => "do Windows",
             "copypath" => "do Explorer",
-            "convert" => "pela extensão",
+            "convert" => "formato · imagem · PDF",
+            "sendfolder" => "copiar para a pasta",
+            "addfolder" => "nova favorita",
+            "moveto" => "pasta favorita",
             _ => "escolher app",
         },
         SliceKind.ContextMenu => "menu de contexto",
@@ -390,10 +393,10 @@ public sealed class WheelWindow : Window
         }
         _done = true;
         var files = _files;
-        var hwnd = _hwnd;
+        // só depois de a roda fechar de vez: diálogos como "Abrir com", Propriedades ou escolher pasta
+        // não podem ficar presos a uma janela que está sendo destruída (isso derruba o app)
+        Closed += (_, _) => Application.Current.Dispatcher.BeginInvoke(async () => await ActionRunner.RunAsync(slice, files, IntPtr.Zero));
         CloseWheel();
-        // depois de a roda sumir (diálogos como "Abrir com" e Propriedades aparecem por cima)
-        Dispatcher.BeginInvoke(async () => await ActionRunner.RunAsync(slice, files, hwnd), System.Windows.Threading.DispatcherPriority.Background);
     }
 
     // ---------------- "Enviar para…": escolher aparelho na própria roda ----------------
@@ -410,24 +413,39 @@ public sealed class WheelWindow : Window
         Native.SetForegroundWindow(_hwnd);
         Focus();
         FillChooser();
-        if (_slices.Count == 0)
+        if (!OnlineDevices().Any())
         {
-            _hubTitle.Text = "Procurando…";
-            _hubSub.Text = "abra o LocalSend no celular";
+            // as pastas já aparecem; os aparelhos entram quando a busca terminar
+            _hubSub.Text = "procurando aparelhos…";
             Dispatcher.BeginInvoke(async () =>
             {
                 await App.Devices.ScanAsync(deep: true);
                 if (IsClosed) return;
                 FillChooser();
-                if (_slices.Count == 0) { _hubTitle.Text = "Nenhum aparelho"; _hubSub.Text = "o LocalSend está aberto no outro aparelho?"; }
+                if (!OnlineDevices().Any()) _hubSub.Text = "nenhum aparelho com LocalSend aberto";
             });
         }
     }
 
+    static IEnumerable<Net.Device> OnlineDevices() => App.Devices.Devices.Where(d => d.IsOnline && d.ShowInWheel);
+
+    /// <summary>
+    /// "Enviar para": aparelhos do LocalSend + pastas favoritas (copia para elas) + "Adicionar pasta…".
+    /// No máximo 8 fatias; "Adicionar pasta…" sempre fica.
+    /// </summary>
     void FillChooser()
     {
-        _slices = App.Devices.Devices.Where(d => d.IsOnline && d.ShowInWheel)
-            .Select(d => Slice.Create(SliceKind.Send, d.Fingerprint, d.Alias, d.IconName)).Take(8).ToList();
+        var items = OnlineDevices().Select(d => Slice.Create(SliceKind.Send, d.Fingerprint, d.Alias, d.IconName)).Take(4).ToList();
+        foreach (var dir in App.Settings.FavoriteFolders.Where(System.IO.Directory.Exists))
+        {
+            if (items.Count >= 7) break;
+            var name = System.IO.Path.GetFileName(dir.TrimEnd('\\'));
+            var s = Slice.Create(SliceKind.Native, "sendfolder", name.Length > 0 ? name : dir, "folder");
+            s.Args = dir;
+            items.Add(s);
+        }
+        items.Add(Slice.Create(SliceKind.Native, "addfolder", "Adicionar pasta…", "plus-circle"));
+        _slices = items;
         _start = -90;
         _hover = -3;
         BuildSlices();

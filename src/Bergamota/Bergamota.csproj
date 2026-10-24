@@ -12,7 +12,7 @@
     <ApplicationIcon>Assets\bergamota.ico</ApplicationIcon>
     <AssemblyName>Bergamota</AssemblyName>
     <RootNamespace>Bergamota</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>Bergamota</Product>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- o DPI por monitor vem do app.manifest (necessário no WPF); o aviso é do analisador do WinForms -->
@@ -29,6 +29,11 @@
     <Resource Include="Assets\Fonts\*.ttf" />
     <Resource Include="Assets\bergamota.ico" />
     <Resource Include="Assets\bergamota.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- PDFsharp fixo na 6.1.1 (MIT). A partir da 6.5 a licença virou AGPL-3.0: não atualizar. -->
+    <PackageReference Include="PDFsharp" Version="[6.1.1]" />
   </ItemGroup>
 
 </Project>

@@ -23,6 +23,9 @@ public static class ActionRunner
         {
             switch (slice.Kind)
             {
+                // pasta favorita no "Enviar para": copia, como o "Enviar para" do Windows
+                case SliceKind.Native when slice.Action == "sendfolder": await FileOps.TransferAsync(files, slice.Args, copy: true); break;
+                case SliceKind.Native when slice.Action == "addfolder": await AddFolderAndSend(files); break;
                 case SliceKind.Native: await RunNative(slice.Action, files, hwnd); break;
                 case SliceKind.ContextMenu: RunMenuItem(slice, files, hwnd); break;
                 case SliceKind.Program: RunProgram(slice, files); break;
@@ -67,13 +70,31 @@ public static class ActionRunner
                 else ActivityLog.Error("Propriedades", "O Windows não abriu as propriedades.");
                 break;
             case "convert":
-                new UI.ConvertWindow(files).Open();
+                UI.Panels.ConvertAndAdjust(files);
+                break;
+            case "moveto":
+                UI.Panels.MoveTo(files);
                 break;
             case "copypath":
                 Clipboard.SetText(string.Join(Environment.NewLine, files.Select(f => $"\"{f}\"")));
                 ActivityLog.Info("link", "Caminho copiado", Describe(files));
                 break;
         }
+    }
+
+    /// <summary>"Adicionar pasta…" do "Enviar para": escolhe a pasta, guarda nas favoritas e copia os arquivos para ela.</summary>
+    static async Task AddFolderAndSend(IReadOnlyList<string> files)
+    {
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Nova pasta favorita (os arquivos serão copiados para ela)" };
+        if (dlg.ShowDialog() != true) return;
+        var dir = dlg.FolderName;
+        if (!App.Settings.FavoriteFolders.Contains(dir, StringComparer.OrdinalIgnoreCase))
+        {
+            App.Settings.FavoriteFolders.Add(dir);
+            App.Settings.Save();
+            ActivityLog.Info("folder", "Pasta favorita adicionada", dir);
+        }
+        await FileOps.TransferAsync(files, dir, copy: true);
     }
 
     static void RunMenuItem(Slice slice, IReadOnlyList<string> files, IntPtr hwnd)

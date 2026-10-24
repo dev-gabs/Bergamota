@@ -140,7 +140,7 @@ public partial class DashboardView : UserControl
         SliceKind.Native => s.Action switch
         {
             "extract-here" or "extract-folder" => "WinRAR", "zip" => "nativo", "powerrename" => "PowerRename",
-            "openwith" => "escolher app", "properties" => "do Windows", "convert" => "pela extensão", _ => "do Explorer",
+            "openwith" => "escolher app", "properties" => "do Windows", "convert" => "formato · imagem · PDF", "moveto" => "pasta favorita", _ => "do Explorer",
         },
         SliceKind.Send => string.IsNullOrEmpty(s.Action) ? "escolher na hora" : "LocalSend",
         SliceKind.Program => "programa",

@@ -54,6 +54,7 @@ public static class Icons
         ["heart"] = "M19,14 C20.5,12.5 22,10.8 22,8.5 A5.5,5.5 0 0 0 16.5,3 C14.7,3 13.5,3.5 12,5 C10.5,3.5 9.3,3 7.5,3 A5.5,5.5 0 0 0 2,8.5 C2,10.8 3.5,12.5 5,14 L12,21 Z",
         ["bolt"] = "M13,2 L4,14 H11 L10,22 L19,10 H12 Z",
         ["palette"] = "M12,22 A10,10 0 1 1 22,12 C22,14.8 19.8,16 18,16 H16 A2,2 0 0 0 14.5,19.3 A1.6,1.6 0 0 1 12,22 Z M7.5,10.5 L7.51,10.5 M12,7 L12.01,7 M16.5,10.5 L16.51,10.5",
+        ["move"] = FolderShape + "M9,13 H15 M12.5,10.5 L15,13 L12.5,15.5",
         ["convert"] = "M4,8 H17 M13,4 L17,8 L13,12 M20,16 H7 M11,12 L7,16 L11,20",
         ["gear"] = C(12, 12, 3) + C(12, 12, 7) + "M12,2 V5 M12,19 V22 M4.9,4.9 L7,7 M17,17 L19.1,19.1 M2,12 H5 M19,12 H22 M4.9,19.1 L7,17 M17,7 L19.1,4.9",
 
@@ -77,7 +78,7 @@ public static class Icons
 
     public static readonly string[] Pickable =
     {
-        "extract", "extract-folder", "zip", "convert", "rename", "openwith", "props", "info", "link", "copy",
+        "extract", "extract-folder", "zip", "convert", "move", "rename", "openwith", "props", "info", "link", "copy",
         "phone", "laptop", "desktop", "send", "share", "folder", "file", "filetext", "image", "music",
         "video", "code", "terminal", "trash", "scissors", "print", "mail", "cloud", "download", "upload",
         "lock", "shield", "search", "globe", "star", "heart", "bolt", "palette", "gear",
