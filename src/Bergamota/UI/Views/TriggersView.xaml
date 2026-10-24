@@ -1,0 +1,183 @@
+﻿<UserControl x:Class="Bergamota.UI.Views.TriggersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="Zone" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Rectangle x:Name="r" RadiusX="5" RadiusY="5" Fill="#0AFFFFFF" Stroke="#4D6A7F72" StrokeThickness="1" StrokeDashArray="3 2"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="r" Property="Fill" Value="#1FC9DC5A"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="r" Property="Fill" Value="#66C9DC5A"/>
+                                <Setter TargetName="r" Property="Stroke" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="r" Property="StrokeDashArray" Value="{x:Null}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="40,26,40,28">
+        <Grid MaxWidth="1100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.ColumnSpan="3" Margin="0,0,0,22">
+                <TextBlock Text="C O M O   A   R O D A   A P A R E C E" Style="{StaticResource Eyebrow}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border HorizontalAlignment="Right" BorderBrush="{StaticResource Muted}" BorderThickness="0,0,2,0" Padding="0,0,16,0">
+                    <TextBlock Text="C O N F I G U R A Ç Õ E S" Style="{StaticResource PageTitle}"/>
+                </Border>
+            </Grid>
+
+            <!-- tecla durante o arraste -->
+            <Border Grid.Row="1" Style="{StaticResource GlassCard}">
+                <StackPanel>
+                    <DockPanel>
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Triggers.KeyEnabled}"/>
+                        <Path Data="{Binding Source=keyboard, Converter={StaticResource Icon}}" Stroke="{StaticResource Accent}" StrokeThickness="2" Width="20" Height="20" Stretch="Uniform" Margin="0,0,12,0"/>
+                        <TextBlock Text="Tecla durante o arraste" Style="{StaticResource CardTitle}"/>
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,18" Text="Comece a arrastar arquivos e aperte a tecla: a roda abre embaixo do cursor."/>
+                    <StackPanel Orientation="Horizontal">
+                        <Border CornerRadius="12" Height="52" Padding="20,0" Background="{StaticResource FieldBg}" BorderBrush="#2C3D33" BorderThickness="1,1,1,3">
+                            <TextBlock x:Name="KeyCap" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </Border>
+                        <Button x:Name="RecordBtn" Style="{StaticResource GhostButton}" Height="52" Margin="12,0,0,0" Click="Record_Click" Content="Gravar outra tecla"/>
+                    </StackPanel>
+                    <WrapPanel Margin="0,16,0,0" x:Name="Chips">
+                        <RadioButton Style="{StaticResource Chip}" GroupName="key" Tag="CapsLock" Content="CapsLock" Checked="Chip_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="key" Tag="XButton1" Content="Botão lateral do mouse" Checked="Chip_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="key" Tag="MButton" Content="Botão do meio" Checked="Chip_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="key" Tag="Space" Content="Espaço" Checked="Chip_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" IsEnabled="False" Opacity="0.5" ToolTip="O Explorer já usa para copiar">
+                            <TextBlock Text="Ctrl" TextDecorations="Strikethrough"/>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource Chip}" IsEnabled="False" Opacity="0.5" ToolTip="O Explorer já usa para mover">
+                            <TextBlock Text="Shift" TextDecorations="Strikethrough"/>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource Chip}" IsEnabled="False" Opacity="0.5" ToolTip="O Explorer já usa para criar atalho">
+                            <TextBlock Text="Alt" TextDecorations="Strikethrough"/>
+                        </RadioButton>
+                    </WrapPanel>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,6,0,0"
+                               Text="Ctrl, Shift e Alt ficam de fora porque o Explorer já usa essas teclas no arraste. A tecla escolhida só é capturada enquanto você arrasta; fora disso ela funciona normal."/>
+                </StackPanel>
+            </Border>
+
+            <!-- borda da tela -->
+            <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource GlassCard}">
+                <StackPanel>
+                    <DockPanel>
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Triggers.EdgeEnabled}"/>
+                        <Path Data="{Binding Source=edge, Converter={StaticResource Icon}}" Stroke="{StaticResource Accent}" StrokeThickness="2" Width="20" Height="20" Stretch="Uniform" Margin="0,0,12,0"/>
+                        <TextBlock Text="Borda ou canto da tela" Style="{StaticResource CardTitle}"/>
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,16" Text="Leve o arquivo (arrastado do Explorer) até a borda e espere um instante. Bom pra quem já usa todas as teclas."/>
+                    <Grid Width="320" Height="180" HorizontalAlignment="Center">
+                        <Border CornerRadius="12" BorderBrush="#36483E" BorderThickness="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#1D2B24" Offset="0"/>
+                                    <GradientStop Color="#121A16" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="Top" Height="12" Margin="60,5,60,0" VerticalAlignment="Top" ToolTip="Topo" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="Bottom" Height="12" Margin="60,0,60,5" VerticalAlignment="Bottom" ToolTip="Base" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="Left" Width="12" Margin="5,40,0,40" HorizontalAlignment="Left" ToolTip="Esquerda" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="Right" Width="12" Margin="0,40,5,40" HorizontalAlignment="Right" ToolTip="Direita" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="TL" Width="30" Height="30" Margin="5,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Canto superior esquerdo" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="TR" Width="30" Height="30" Margin="0,5,5,0" HorizontalAlignment="Right" VerticalAlignment="Top" ToolTip="Canto superior direito" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="BL" Width="30" Height="30" Margin="5,0,0,5" HorizontalAlignment="Left" VerticalAlignment="Bottom" ToolTip="Canto inferior esquerdo" Click="Zone_Click"/>
+                        <ToggleButton Style="{StaticResource Zone}" Tag="BR" Width="30" Height="30" Margin="0,0,5,5" HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTip="Canto inferior direito" Click="Zone_Click"/>
+                    </Grid>
+                    <Border Width="80" Height="12" CornerRadius="0,0,8,8" Background="#2A3A31" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <DockPanel Margin="0,18,0,10">
+                        <TextBlock DockPanel.Dock="Right" Foreground="{StaticResource Accent}" FontWeight="SemiBold">
+                            <Run Text="{Binding Triggers.DwellMs}"/><Run Text=" ms"/>
+                        </TextBlock>
+                        <TextBlock Text="Tempo parado na borda"/>
+                    </DockPanel>
+                    <Slider Style="{StaticResource AccentSlider}" Minimum="100" Maximum="1000" TickFrequency="50" IsSnapToTickEnabled="True"
+                            Value="{Binding Triggers.DwellMs}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- comportamento -->
+            <Border Grid.Row="3" Grid.ColumnSpan="3" Style="{StaticResource GlassCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{Binding Source=palette, Converter={StaticResource Icon}}" Stroke="{StaticResource Accent}" StrokeThickness="2" Width="20" Height="20" Stretch="Uniform" Margin="0,0,12,0"/>
+                        <TextBlock Text="Comportamento" Style="{StaticResource CardTitle}"/>
+                    </StackPanel>
+                    <UniformGrid Columns="2" Margin="0,18,0,0">
+                        <Border Style="{StaticResource GlassRow}" Padding="16,14" Margin="0,0,10,10">
+                            <DockPanel>
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Triggers.HotkeyEnabled}"/>
+                                <StackPanel>
+                                    <TextBlock Text="Atalho global Win+Shift+B" FontWeight="Medium"/>
+                                    <TextBlock x:Name="HotkeyStatus" Style="{StaticResource Hint}" Text="Abre a roda com o que está selecionado no Explorer"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <Border Style="{StaticResource GlassRow}" Padding="16,14" Margin="10,0,0,10">
+                            <DockPanel>
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding StartWithWindows}"/>
+                                <StackPanel>
+                                    <TextBlock Text="Iniciar com o Windows" FontWeight="Medium"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="Fica quietinha na bandeja"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <Border Style="{StaticResource GlassRow}" Padding="16,14" Margin="0,0,10,0">
+                            <DockPanel>
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding AutoProfile}"/>
+                                <StackPanel>
+                                    <TextBlock Text="Perfil automático" FontWeight="Medium"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="Escolhe o perfil pela extensão dos arquivos"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <Border Style="{StaticResource GlassRow}" Padding="16,10" Margin="10,0,0,0">
+                            <DockPanel>
+                                <ComboBox x:Name="SizeCombo" DockPanel.Dock="Right" Style="{StaticResource Combo}" Width="150" Height="40" SelectionChanged="Size_Changed"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Tamanho da roda" FontWeight="Medium"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="Diâmetro na tela"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <Border Style="{StaticResource GlassRow}" Padding="16,14" Margin="0,10,10,0">
+                            <DockPanel>
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding ConvertSlice}"/>
+                                <StackPanel>
+                                    <TextBlock Text="Fatia “Converter para…”" FontWeight="Medium"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="Fica fixa embaixo da roda, em todos os perfis"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

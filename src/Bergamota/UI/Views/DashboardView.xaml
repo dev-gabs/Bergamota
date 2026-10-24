@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="Bergamota.UI.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="40,26,40,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border HorizontalAlignment="Right" VerticalAlignment="Top" BorderBrush="{StaticResource Muted}" BorderThickness="0,0,2,0" Padding="0,0,16,0" Margin="0,8,0,0">
+            <TextBlock Text="M I N H A   R O D A" Style="{StaticResource PageTitle}"/>
+        </Border>
+
+        <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="P E R F I S   C R I A D O S :" Style="{StaticResource Eyebrow}" HorizontalAlignment="Center"/>
+            <Border CornerRadius="23" Padding="6" Background="#8C0A100C" BorderBrush="{StaticResource GlassStroke}" BorderThickness="1">
+                <ItemsControl x:Name="Pills">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton Style="{StaticResource PillButton}" GroupName="dashPills" Content="{Binding Name}" Checked="Pill_Checked" Tag="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </StackPanel>
+
+        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="0,10,0,0">
+            <Canvas x:Name="Diagram" Width="1000" Height="600" ClipToBounds="False"/>
+        </Viewbox>
+    </Grid>
+</UserControl>

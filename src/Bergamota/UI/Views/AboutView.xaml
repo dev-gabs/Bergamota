@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="Bergamota.UI.Views.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="40">
+        <Border Style="{StaticResource GlassCard}" MaxWidth="640" VerticalAlignment="Center" Padding="36">
+            <StackPanel>
+                <Image Source="/Assets/bergamota.png" Width="80" Height="80" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                <TextBlock Text="bergamota" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource Accent}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <TextBlock x:Name="Version" Style="{StaticResource Hint}" HorizontalAlignment="Center"/>
+                <TextBlock Style="{StaticResource Hint}" TextAlignment="Center" Margin="0,18,0,0" FontSize="13.5"
+                           Text="Uma roda de ações para os arquivos que você arrasta, inspirada no Tangerine do Mac. Extrai, compacta, renomeia, abre, mostra propriedades e manda para o celular pela rede local (protocolo LocalSend)."/>
+                <TextBlock Style="{StaticResource Hint}" TextAlignment="Center" Margin="0,14,0,0"
+                           Text="Configurações e registro ficam em %AppData%\Bergamota."/>
+                <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="OpenFolder_Click" Content="Abrir pasta de configurações"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
